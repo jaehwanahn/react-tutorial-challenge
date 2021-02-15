@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { unstable_concurrentAct } from 'react-dom/test-utils';
 import './index.css';
 
 function Square (props) {
@@ -15,27 +14,27 @@ function Square (props) {
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
-    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />;
+  renderSquare(row, col) {
+    return <Square value={this.props.squares[row][col]} onClick={() => this.props.onClick({row, col})} />;
   }
 
   render() {
     return (
       <div>
         <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
+          {this.renderSquare(0, 0)}
+          {this.renderSquare(0, 1)}
+          {this.renderSquare(0, 2)}
         </div>
         <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
+          {this.renderSquare(1, 0)}
+          {this.renderSquare(1, 1)}
+          {this.renderSquare(1, 2)}
         </div>
         <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
+          {this.renderSquare(2, 0)}
+          {this.renderSquare(2, 1)}
+          {this.renderSquare(2, 2)}
         </div>
       </div>
     );
@@ -47,23 +46,40 @@ class Game extends React.Component {
     super(props)
     this.state = {
       history: [{
-        squares: Array(9).fill(null)
+        squares: this.createTableArray()
       }],
       stepNumber: 0,
       xIsNext: true
     }
   }
 
+  createTableArray() {
+    // var array = new Array(3)
+    // for (var i = 0 ; i < 3 ; i++)
+    //   array[i] = new Array(3)
+
+    var array = new Array(3).fill(null)
+    for (var i = 0 ; i < 3 ; i++)
+      array[i] = new Array(3).fill(null)
+
+    return array
+  }
+
   handleClick(i) {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-
-    if (calculateWinner(squares) || squares[i]) {
+    
+    if (calculateWinner(squares) || squares[i.row][i.col]) {
       return;
     }
 
-    squares[i] = this.state.xIsNext ? 'X' : 'O'
+    squares[i.row][i.col] = this.state.xIsNext ? 'X' : 'O'
+   
+    //
+    console.log("Row: " + i.row + ", Col: " + i.col + ", Val: " + squares[i.row][i.col])
+    //
+    
     this.setState({
       history: history.concat([
         {
@@ -112,7 +128,7 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={current.squares} onClick={(i) => this.handleClick(i)}/>
+          <Board squares={current.squares} onClick={i => this.handleClick(i)}/>
         </div>
         <div className="game-info">
           <div>{ status }</div>
@@ -123,7 +139,7 @@ class Game extends React.Component {
   }
 }
 
-function calculateWinner(squares) {
+function calculateWinnerOld(squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -142,6 +158,35 @@ function calculateWinner(squares) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
+  }
+
+  return null;
+}
+
+function calculateWinner(squares) {
+
+  // Horizontal check
+  for (var i = 0; i < 3; i++) {
+    if (squares[i][0] && squares[i][0] === squares[i][1] && squares[i][0] === squares[i][2]) {
+      return squares[i][0];
+    }
+  }
+
+  // Vertical check
+  for (var i = 0; i < 3; i++) {
+    if (squares[0][i] && squares[0][i] === squares[1][i] && squares[0][i] === squares[2][i]) {
+      return squares[0][i];
+    }
+  }
+
+  // Diagonal check 1
+  if (squares[0][0] && squares[0][0] === squares[1][1] && squares[0][0] === squares[2][2]) {
+    return squares[0][0];
+  }
+
+  // Diagonal check 2
+  if (squares[2][0] && squares[2][0] === squares[1][1] && squares[2][0] === squares[0][2]) {
+    return squares[2][0];
   }
 
   return null;
