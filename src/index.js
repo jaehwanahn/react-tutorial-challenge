@@ -46,23 +46,11 @@ class Game extends React.Component {
     super(props)
     this.state = {
       history: [{
-        squares: this.createTableArray()
+        squares: Array(3).fill(null).map(() => Array(3).fill(null))
       }],
       stepNumber: 0,
       xIsNext: true
     }
-  }
-
-  createTableArray() {
-    // var array = new Array(3)
-    // for (var i = 0 ; i < 3 ; i++)
-    //   array[i] = new Array(3)
-
-    var array = new Array(3).fill(null)
-    for (var i = 0 ; i < 3 ; i++)
-      array[i] = new Array(3).fill(null)
-
-    return array
   }
 
   handleClick(i) {
@@ -75,11 +63,11 @@ class Game extends React.Component {
     }
 
     squares[i.row][i.col] = this.state.xIsNext ? 'X' : 'O'
-   
+
     //
-    console.log("Row: " + i.row + ", Col: " + i.col + ", Val: " + squares[i.row][i.col])
+    //console.log("Row: " + i.row + ", Col: " + i.col + ", Val: " + squares[i.row][i.col])
     //
-    
+
     this.setState({
       history: history.concat([
         {
@@ -105,6 +93,9 @@ class Game extends React.Component {
 
   render() {
     const history = this.state.history
+    history.forEach(a =>
+      console.log(a)
+    )
     const current = history[this.state.stepNumber]
     const winner = calculateWinner(current.squares)
 
@@ -139,6 +130,7 @@ class Game extends React.Component {
   }
 }
 
+// old function when using just a number on each square.
 function calculateWinnerOld(squares) {
   const lines = [
     [0, 1, 2],
