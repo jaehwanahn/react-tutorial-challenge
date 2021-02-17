@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import update from 'immutability-helper';
 
 function Square (props) {
   return (
@@ -46,11 +47,20 @@ class Game extends React.Component {
     super(props)
     this.state = {
       history: [{
-        squares: Array(3).fill(null).map(() => Array(3).fill(null))
+        squares: Array.from(Array(3), () => new Array(3)),
+        row: null,
+        col: null,
+        value: null
       }],
       stepNumber: 0,
       xIsNext: true
     }
+  }
+
+
+  //Execute whenever handleClick is executed.
+  componentDidUpdate() {
+    console.log(this.state.history, "new");    
   }
 
   handleClick(i) {
@@ -62,7 +72,24 @@ class Game extends React.Component {
       return;
     }
 
-    squares[i.row][i.col] = this.state.xIsNext ? 'X' : 'O'
+    // May not be an exact situation, but still give you an idea how to setState for nested array.
+    // https://stackoverflow.com/questions/51433182/set-state-of-nested-array
+
+    // Had to create a separate array. All nested arrays get overwritten with the current data when 2 dimensional sqaures array is used unlike the original 1 dimensional sqaures array.
+    let arr = [[null,null,null],[null,null,null],[null,null,null]];
+
+    // o is each sqaures array element object
+    // ri is the row index
+    // ci is the col index
+    squares.map((o, ri) => {
+      o.map((obj, ci) => {
+        if(squares[ri][ci]) {
+          arr[ri][ci] = squares[ri][ci];
+        }
+      });
+    })
+
+    arr[i.row][i.col] = this.state.xIsNext ? 'X' : 'O'
 
     //
     //console.log("Row: " + i.row + ", Col: " + i.col + ", Val: " + squares[i.row][i.col])
@@ -71,7 +98,10 @@ class Game extends React.Component {
     this.setState({
       history: history.concat([
         {
-          squares: squares
+          squares: arr,
+          row: [i.row],
+          col: [i.col],
+          value: arr[i.row][i.col]
         }
       ]),
       stepNumber: history.length,
@@ -93,14 +123,12 @@ class Game extends React.Component {
 
   render() {
     const history = this.state.history
-    history.forEach(a =>
-      console.log(a)
-    )
     const current = history[this.state.stepNumber]
     const winner = calculateWinner(current.squares)
 
     const moves = history.map((step, move) => {
-      const desc = move ? 'Go to move #' + move : 'Go to game start';
+      //const desc = move ? 'Go to move #' + move : 'Go to game start';
+      const desc = move ? step.value + ' is placed at row - ' + step.row + ', column - ' + step.col : 'Go to game start';
       return (
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
