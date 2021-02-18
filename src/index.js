@@ -58,7 +58,7 @@ class Game extends React.Component {
   }
 
 
-  //Execute whenever handleClick is executed.
+  //Execute whenever state is changed.
   componentDidUpdate() {
     console.log(this.state.history, "new");    
   }
@@ -88,6 +88,9 @@ class Game extends React.Component {
         }
       });
     })
+
+    // Doing slice as below won't make it work instead of map chaining....
+    // arr = squares.slice()
 
     arr[i.row][i.col] = this.state.xIsNext ? 'X' : 'O'
 
