@@ -50,7 +50,8 @@ class Game extends React.Component {
         squares: Array.from(Array(3), () => new Array(3)),
         row: null,
         col: null,
-        value: null
+        value: null,
+        isCurrent: true
       }],
       stepNumber: 0,
       xIsNext: true
@@ -63,7 +64,16 @@ class Game extends React.Component {
     console.log(this.state.history, "new");    
   }
 
+  // To clear exisiting bold style.
+  clearBold()
+  {
+    this.state.history.forEach(o => 
+      o.isCurrent = false
+    )
+  }
+
   handleClick(i) {
+    this.clearBold()
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -104,7 +114,8 @@ class Game extends React.Component {
           squares: arr,
           row: [i.row],
           col: [i.col],
-          value: arr[i.row][i.col]
+          value: arr[i.row][i.col],
+          isCurrent: true
         }
       ]),
       stepNumber: history.length,
@@ -116,11 +127,14 @@ class Game extends React.Component {
   }
 
   jumpTo(step) {
+    this.clearBold()
+    this.state.history[step].isCurrent = true
     this.setState({
+      history: this.state.history,
       stepNumber: step,
       // xIsNext is true when it's step number is even.
       // The first step is always X, so any moves by O are even.
-      xIsNext: (step % 2) === 0
+      xIsNext: (step % 2) === 0,
     })
   }
 
@@ -132,11 +146,20 @@ class Game extends React.Component {
     const moves = history.map((step, move) => {
       //const desc = move ? 'Go to move #' + move : 'Go to game start';
       const desc = move ? step.value + ' is placed at row - ' + step.row + ', column - ' + step.col : 'Go to game start';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
+      if (step.isCurrent) {
+        return (
+          <li key={move}>
+            <button className='boldOnSelect' onClick={() => this.jumpTo(move)}>{desc}</button>
+          </li>
+        );
+      }
+      else {
+        return (
+          <li key={move}>
+            <button className='unboldOthers' onClick={() => this.jumpTo(move)}>{desc}</button>
+          </li>
+        );
+      }
     });
 
 
