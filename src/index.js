@@ -5,38 +5,47 @@ import update from 'immutability-helper';
 
 function Square (props) {
   return (
-    <button
-      className="square"
-      onClick={() => props.onClick()}
-    >
+    <button className="square" onClick={props.onClick}>
       {props.value}
     </button>
   );
 }
 
+
 class Board extends React.Component {
-  renderSquare(row, col) {
-    return <Square value={this.props.squares[row][col]} onClick={() => this.props.onClick({row, col})} />;
+  // renderSquare(row, col) {
+  //   return <Square value={this.props.squares[row][col]} onClick={() => this.props.onClick({row, col})} />;
+  // }
+
+  renderSquare() {
+    // for (var i = 0 ; i < 3 ; i++) {
+    //   for (var j = 0 ; j < 3 ; j++) {
+    //     this.props.squares[i][j] = 'O'
+    //   }
+    // }
+    return (
+      <>
+        {
+          this.props.squares.map((r, row) => {
+            return (
+              <div className="board-row">
+                {r.map((obj, col) => {
+                  return (
+                    <Square value={this.props.squares[row][col]} onClick={() => this.props.onClick({row, col})} />
+                  )
+                })}
+              </div>
+            )
+          })
+        }
+      </>
+    )
   }
 
   render() {
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0, 0)}
-          {this.renderSquare(0, 1)}
-          {this.renderSquare(0, 2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(1, 0)}
-          {this.renderSquare(1, 1)}
-          {this.renderSquare(1, 2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(2, 0)}
-          {this.renderSquare(2, 1)}
-          {this.renderSquare(2, 2)}
-        </div>
+        { this.renderSquare() }
       </div>
     );
   }
@@ -47,7 +56,7 @@ class Game extends React.Component {
     super(props)
     this.state = {
       history: [{
-        squares: Array.from(Array(3), () => new Array(3)),
+        squares: [[null, null, null], [null, null, null], [null, null, null]],
         row: null,
         col: null,
         value: null,
@@ -57,7 +66,6 @@ class Game extends React.Component {
       xIsNext: true
     }
   }
-
 
   //Execute whenever state is changed.
   componentDidUpdate() {
@@ -77,7 +85,7 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    
+
     if (calculateWinner(squares) || squares[i.row][i.col]) {
       return;
     }
