@@ -11,7 +11,6 @@ function Square (props) {
   );
 }
 
-
 class Board extends React.Component {
   // renderSquare(row, col) {
   //   return <Square value={this.props.squares[row][col]} onClick={() => this.props.onClick({row, col})} />;
@@ -63,7 +62,8 @@ class Game extends React.Component {
         isCurrent: true
       }],
       stepNumber: 0,
-      xIsNext: true
+      xIsNext: true,
+      sort: "ASC"
     }
   }
 
@@ -146,29 +146,83 @@ class Game extends React.Component {
     })
   }
 
+  sort() {
+    const history = this.state.history
+    const tempList = []
+    var sorting = this.state.sort
+
+    var count = history.length - 1
+
+    for (var i = 0; i < history.length; i++)
+    {
+      tempList[i] = history[count]
+      count--
+    }
+
+    if (sorting === "ASC")
+      sorting = "DESC"
+    else
+      sorting = "ASC"
+
+    this.setState({
+      history: tempList,
+      sort: sorting
+    })
+  }
+
   render() {
     const history = this.state.history
     const current = history[this.state.stepNumber]
     const winner = calculateWinner(current.squares)
+    const sort = this.state.sort
+    
+    
 
     const moves = history.map((step, move) => {
-      //const desc = move ? 'Go to move #' + move : 'Go to game start';
-      const desc = move ? step.value + ' is placed at row - ' + step.row + ', column - ' + step.col : 'Go to game start';
-      if (step.isCurrent) {
-        return (
-          <li key={move}>
-            <button className='boldOnSelect' onClick={() => this.jumpTo(move)}>{desc}</button>
-          </li>
-        );
+      var move2 = []
+      for (var i = move.length - 1 ; i = 0 ; i--)
+      {
+        move2[0] = move[i]
       }
-      else {
-        return (
-          <li key={move}>
-            <button className='unboldOthers' onClick={() => this.jumpTo(move)}>{desc}</button>
-          </li>
-        );
+      
+      if (sort === "ASC")  
+      {
+        const desc = move ? step.value + ' is placed at row - ' + step.row + ', column - ' + step.col : 'Go to game start';
+        if (step.isCurrent) {
+          return (
+            <li key={move}>
+              <button className='boldOnSelect' onClick={() => this.jumpTo(move)}>{desc}</button>
+            </li>
+          );
+        }
+        else {
+          return (
+            <li key={move}>
+              <button className='unboldOthers' onClick={() => this.jumpTo(move)}>{desc}</button>
+            </li>
+          );
+        }
+      }
+      else if (sort === "DESC")
+      {
+        const desc = move2 ? step.value + ' is placed at row - ' + step.row + ', column - ' + step.col : 'Go to game start';
+        if (step.isCurrent) {
+          return (
+            <li key={move2}>
+              <button className='boldOnSelect' onClick={() => this.jumpTo(move)}>{desc}</button>
+            </li>
+          );
+        }
+        else {
+          return (
+            <li key={move2}>
+              <button className='unboldOthers' onClick={() => this.jumpTo(move)}>{desc}</button>
+            </li>
+          );
+        }
       }
     });
+  
 
 
     let status
@@ -186,6 +240,9 @@ class Game extends React.Component {
         <div className="game-info">
           <div>{ status }</div>
           <ol>{ moves }</ol>
+        </div>
+        <div>
+          <button onClick={ () => this.sort() }>Sort</button>
         </div>
       </div>
     );
